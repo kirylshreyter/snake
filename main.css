@@ -1,0 +1,45 @@
+.cell {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    text-align: center;
+    background-color: #708090;
+    border-radius: 7px;
+    border: 3px solid chocolate;
+}
+
+.row {
+}
+
+.dialog {
+    position: absolute;
+    background-color: slategrey;
+    display: block;
+    z-index: 1;
+    padding: 20px;
+    border-radius: 10px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.grid {
+    width: auto;
+    height: auto;
+    background-color: transparent;
+    position: absolute;
+    z-index: 3;
+    display: none;
+}
+
+.container {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
+.inputs{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 3px;
+    margin-bottom: 4px;
+}

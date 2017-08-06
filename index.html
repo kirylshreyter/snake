@@ -1,0 +1,26 @@
+<html>
+<head>
+    <title>Test application</title>
+    <link rel="stylesheet" href="main.css">
+    <script src="application.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="dialog" id="dialog">
+            <input placeholder="Enter your name..." autocomplete="false" id="name" class="inputs">
+            <input placeholder="Enter width..." autocomplete="false" id="width" class="inputs">
+            <input placeholder="Enter height..." autocomplete="false" id="height" class="inputs">
+                <select class="inputs" id="moveSpeed">
+                    <option>Please, select speed</option>
+                    <option value="3">Slow</option>
+                    <option value="2">Medium</option>
+                    <option value="1">High</option>
+                </select>
+            <button class="inputs" id="begin" value="Begin" onclick="createNewGrid();">Begin</button>
+    </div>
+    <div class="grid" id="grid"></div>
+</div>
+</body>
+
+</html>
