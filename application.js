@@ -1,28 +1,33 @@
+var MAIN_SNAKE_COLOR = '7FFFD4';
+var SNAKE_HEAD_COLOR = '1E90FF';
+var CELL_COLOR = '#708090';
+var FOOD_COLOR = 'FF7F50';
 var stepInterval;
 var foodCreationInterval;
 var defaultWidth = 5;
 var defaultHeight = 5;
 var defaultSpeed = 1500;
-var allGridCells;
+var allGridCells = [];
+var allGridCellsIndexes = [];
 var currentHeadPosition;
 var foodPosition;
 var direction = 'right';
 var foodCounter = 0;
 var fullSnake = [];
-var score;
-
 
 function createEat() {
-    if (foodCounter != 1) {
+    if (foodCounter == 0) {
         foodPosition = [generate(0, defaultWidth), generate(0, defaultHeight)];
-        for (var fullSnakeIndexer = 0; fullSnakeIndexer < fullSnake.length; fullSnakeIndexer++) {
-            while (fullSnake[fullSnakeIndexer][0] == foodPosition[0] && fullSnake[fullSnakeIndexer][1] == foodPosition[1]) {
-                foodPosition = [generate(0, defaultWidth), generate(0, defaultHeight)];
-            }
+        while (fullSnake.some(isContains)) {
+            foodPosition = [generate(0, defaultWidth), generate(0, defaultHeight)];
         }
-        findCellAndPaintOver(foodPosition, 'FF7F50');
+        findCellAndPaintOver(foodPosition, FOOD_COLOR);
         foodCounter = 1;
     }
+}
+
+function isContains(element, index, array, pos) {
+    return compareTwoPositions(element, foodPosition);
 }
 
 function generate(min, max) {
@@ -39,8 +44,8 @@ function createGrid(width, height) {
         var row = appendChild(result, 'row');
         for (var widthIterator = 0; widthIterator < width; widthIterator++) {
             var cell = appendChild(row, 'cell');
-            cell.setAttribute('x', widthIterator.toString());
-            cell.setAttribute('y', heightIterator.toString());
+            allGridCells.push(cell);
+            allGridCellsIndexes.push([widthIterator, heightIterator]);
         }
     }
     return result;
@@ -52,47 +57,44 @@ function appendChild(parent, appenderStyle) {
     return child;
 }
 
-function createNewGrid() {
-    if (document.getElementById('width').value) {
-        defaultWidth = document.getElementById('width').value;
+function widthExists() {
+    if (document.getElementById('width').value) return true;
+}
+
+function heightExists() {
+    if (document.getElementById('height').value) return true;
+}
+
+function setWidthAndHeight() {
+    defaultWidth = document.getElementById('width').value;
+    defaultHeight = document.getElementById('height').value;
+}
+
+function setSpeedIfExists() {
+    if (document.getElementById('speed').value != 'Please, select speed') {
+        defaultSpeed = document.getElementById('speed').value * 500;
     }
-    if (document.getElementById('height').value) {
-        defaultHeight = document.getElementById('height').value;
-    }
-    if (document.getElementById('moveSpeed').value != 'Please, select speed') {
-        defaultSpeed = document.getElementById('moveSpeed').value * 500;
-    }
+}
+
+function play() {
+    if (widthExists() && heightExists()) setWidthAndHeight();
+    setSpeedIfExists();
     document.getElementById('grid').appendChild(createGrid(defaultWidth, defaultHeight));
     currentHeadPosition = [generate(0, defaultWidth), generate(0, defaultHeight)];
     fullSnake.unshift(currentHeadPosition);
     setStyleDisplayToElement('grid', 'block');
     setStyleDisplayToElement('dialog', 'none');
-    allGridCells = getElementsByClassName('cell');
     document.addEventListener('keydown', changeDirection);
     setTimeout(start, 2000);
 }
 
-function getElementsByClassName(className) {
-    return document.getElementsByClassName(className);
-}
-
 function setStyleDisplayToElement(elementId, value) {
     document.getElementById(elementId).style.display = value;
-
-}
-
-function findCellByCoordinates(position) {
-    for (var staticCellsIndexer = 0; staticCellsIndexer < allGridCells.length; staticCellsIndexer++) {
-        var curCell = allGridCells[staticCellsIndexer];
-        if ((curCell.getAttribute('x') == position[0] & curCell.getAttribute('y') == position[1])) {
-            return curCell;
-        }
-    }
 }
 
 function start() {
-    foodCreationInterval = setInterval(createEat, 500);
-    stepInterval = setInterval(getNextDefaultPosition, defaultSpeed);
+    foodCreationInterval = setInterval(createEat, defaultSpeed);
+    stepInterval = setInterval(nextSnakeStep, defaultSpeed);
 }
 
 function compareTwoPositions(firstPosition, secondPosition) {
@@ -101,84 +103,83 @@ function compareTwoPositions(firstPosition, secondPosition) {
     });
 }
 
+function setScore(score) {
+    document.getElementById('score').innerText = score;
+}
+
 function checkIfBrake(position) {
-    for (var fullSnakeIndexer = 0; fullSnakeIndexer < fullSnake.length; fullSnakeIndexer++) {
-        if (fullSnake[fullSnakeIndexer][0] == position[0] && fullSnake[fullSnakeIndexer][1] == position[1]) {
+    fullSnake.forEach(function (element, index, array) {
+        if (compareTwoPositions(element, position)) {
             clearInterval(foodCreationInterval);
             clearInterval(stepInterval);
-            score = fullSnake.length;
-            alert('GAME OVER, YOUR SCORE ' + score);
+            alert('GAME OVER, YOUR SCORE ' + fullSnake.length);
+            return;
         }
+    });
+}
+
+function increaseSnakeLength(position) {
+    setScore(fullSnake.length);
+    if (compareTwoPositions(position, foodPosition)) {
+        fullSnake.unshift(foodPosition);
+        foodCounter = 0;
     }
 }
 
+function stepLeft(position) {
+    if (currentHeadPosition[0] - 1 >= 0) {
+        currentHeadPosition = [currentHeadPosition[0] - 1, currentHeadPosition[1]];
+    } else {
+        currentHeadPosition = [defaultWidth - 1, currentHeadPosition[1]];
+    }
+    increaseSnakeLength(position);
+    move(currentHeadPosition);
+}
 
-function getNextDefaultPosition() {
+function stepTop(position) {
+    if (currentHeadPosition[1] - 1 >= 0) {
+        currentHeadPosition = [currentHeadPosition[0], currentHeadPosition[1] - 1];
+    } else {
+        currentHeadPosition = [currentHeadPosition[0], defaultHeight - 1];
+    }
+    increaseSnakeLength(position);
+    move(currentHeadPosition);
+}
+
+function stepRight(position) {
+    if (currentHeadPosition[0] + 1 < defaultWidth) {
+        currentHeadPosition = [currentHeadPosition[0] + 1, currentHeadPosition[1]];
+    } else {
+        currentHeadPosition = [0, currentHeadPosition[1]];
+    }
+    increaseSnakeLength(position);
+    move(currentHeadPosition);
+}
+
+function stepDown(position) {
+    if (currentHeadPosition[1] + 1 < defaultHeight) {
+        currentHeadPosition = [currentHeadPosition[0], currentHeadPosition[1] + 1];
+    } else {
+        currentHeadPosition = [currentHeadPosition[0], 0];
+    }
+    increaseSnakeLength(position);
+    move(currentHeadPosition);
+}
+
+function nextSnakeStep() {
     var position = currentHeadPosition;
-
-    function increaseSnakeLength() {
-        if (compareTwoPositions(position, foodPosition)) {
-            fullSnake.unshift(foodPosition);
-            foodCounter = 0;
-        }
-    }
-
-    function stepLeft() {
-        if (currentHeadPosition[0] - 1 >= 0) {
-            currentHeadPosition = [currentHeadPosition[0] - 1, currentHeadPosition[1]];
-            increaseSnakeLength();
-        } else {
-            currentHeadPosition = [defaultWidth - 1, currentHeadPosition[1]];
-            increaseSnakeLength();
-        }
-        move(currentHeadPosition);
-    }
-
-    function stepTop() {
-        if (currentHeadPosition[1] - 1 >= 0) {
-            currentHeadPosition = [currentHeadPosition[0], currentHeadPosition[1] - 1];
-            increaseSnakeLength();
-        } else {
-            currentHeadPosition = [currentHeadPosition[0], defaultHeight - 1];
-            increaseSnakeLength();
-        }
-        move(currentHeadPosition);
-    }
-
-    function stepRight() {
-        if (currentHeadPosition[0] + 1 < defaultWidth) {
-            currentHeadPosition = [currentHeadPosition[0] + 1, currentHeadPosition[1]];
-            increaseSnakeLength();
-        } else {
-            currentHeadPosition = [0, currentHeadPosition[1]];
-            increaseSnakeLength();
-        }
-        move(currentHeadPosition);
-    }
-
-    function stepDown() {
-        if (currentHeadPosition[1] + 1 < defaultHeight) {
-            currentHeadPosition = [currentHeadPosition[0], currentHeadPosition[1] + 1];
-            increaseSnakeLength();
-        } else {
-            currentHeadPosition = [currentHeadPosition[0], 0];
-            increaseSnakeLength();
-        }
-        move(currentHeadPosition);
-    }
-
     switch (direction) {
         case 'left':
-            stepLeft();
+            stepLeft(position);
             break;
         case 'top':
-            stepTop();
+            stepTop(position);
             break;
         case 'right':
-            stepRight();
+            stepRight(position);
             break;
         case 'down':
-            stepDown();
+            stepDown(position);
             break;
     }
 }
@@ -201,21 +202,27 @@ function changeDirection(e) {
 }
 
 function move(position) {
-    findCellAndPaintOver(fullSnake.pop(), '#708090');
+    findCellAndPaintOver(fullSnake.pop(), CELL_COLOR);
     checkIfBrake(position);
     fullSnake.unshift(position);
     paintCells(fullSnake);
 }
 
 function findCellAndPaintOver(position, color) {
-    var cell = findCellByCoordinates(position);
-    cell.style.backgroundColor = color;
+    allGridCellsIndexes.forEach(function (element, index, array) {
+        if (compareTwoPositions(element, position)) {
+            allGridCells[index].style.backgroundColor = color;
+            return;
+        }
+    });
+}
+
+function paintCell(element, index, array) {
+    findCellAndPaintOver(element, MAIN_SNAKE_COLOR);
 }
 
 function paintCells(snake) {
-    findCellAndPaintOver(snake[0], 'red');
-    for (var snakeIndexer = 1; snakeIndexer < snake.length; snakeIndexer++) {
-        findCellAndPaintOver(snake[snakeIndexer], '00008b');
-    }
+    snake.forEach(paintCell);
+    findCellAndPaintOver(snake[0], SNAKE_HEAD_COLOR);
 }
 
