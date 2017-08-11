@@ -14,6 +14,10 @@ var foodPosition;
 var direction = 'right';
 var foodCounter = 0;
 var fullSnake = [];
+var userName;
+window.onload = function () {
+    loadScores();
+}
 
 function createEat() {
     if (foodCounter == 0) {
@@ -84,6 +88,8 @@ function play() {
     fullSnake.unshift(currentHeadPosition);
     setStyleDisplayToElement('grid', 'block');
     setStyleDisplayToElement('dialog', 'none');
+    userName = document.getElementById('name').value;
+    alert(userName);
     document.addEventListener('keydown', changeDirection);
     setTimeout(start, 2000);
 }
@@ -113,14 +119,15 @@ function checkIfBrake(position) {
             clearInterval(foodCreationInterval);
             clearInterval(stepInterval);
             alert('GAME OVER, YOUR SCORE ' + fullSnake.length);
+            saveScore();
             return;
         }
     });
 }
 
 function increaseSnakeLength(position) {
-    setScore(fullSnake.length);
     if (compareTwoPositions(position, foodPosition)) {
+        setScore(fullSnake.length);
         fullSnake.unshift(foodPosition);
         foodCounter = 0;
     }

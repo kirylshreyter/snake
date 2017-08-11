@@ -6,12 +6,6 @@
     <script src="ajax.js"></script>
 </head>
 <body>
-<div id="userBar" style="display: block;">
-    <p>Your score: <div id="score"></div></p>
-    <p>Score table: <div id="score_table"></div></p>
-    <button class="inputs" id="getData" value="Get_DATA" onclick="GetScores('http://localhost:8080/spring/services/','score_table');">GET DATA</button>
-    <button class="inputs" id="saveData" value="saveData" onclick="SaveScore('http://localhost:8080/spring/services/');">GET DATA</button>
-</div>
 <div class="container">
     <div class="dialog" id="dialog">
         <input placeholder="Enter your name..." autocomplete="false" id="name" class="inputs">
@@ -25,7 +19,23 @@
         </select>
         <button class="inputs" id="begin" value="Begin" onclick="play();">Begin</button>
     </div>
-    <div class="grid" id="grid"></div>
+    <div class="grid" id="grid">Your score:
+        <div id="score" style="display: inline-block;">0</div>
+    </div>
+
+    <div class="bar">
+        <p>Score table:
+        <div>
+            <table id="score_table">
+                <tr>
+                    <td>Name</td>
+                    <td>Score</td>
+                    <td>Date</td>
+                </tr>
+            </table>
+        </div>
+        </p>
+    </div>
 </div>
 </body>
 
